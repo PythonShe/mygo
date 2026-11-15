@@ -259,7 +259,7 @@ func TestLongDetail(t *testing.T) {
 	tt := ui.NewTester(newWindow(s).view, frontend.StatusWidth, frontend.StatusHeight)
 	line, _ := tt.Find(v.Detail)
 	// Three lines at the window's width.
-	v.Detail = `mygo: checking for updates: Get "https://example.com/releases/latest/download/update-macos-arm64.json": dial tcp 20.205.243.166:443: i/o timeout`
+	v.Detail = `mygo: checking for updates: Get "https://example.com/releases/latest/download/update-darwin-arm64.json": dial tcp 20.205.243.166:443: i/o timeout`
 	s.set(v)
 	tt.Frame()
 	size := s.fit(t)

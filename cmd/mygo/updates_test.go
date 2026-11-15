@@ -162,7 +162,7 @@ func TestUpdatesConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := c.updateFeed("darwin-arm64"); got != "https://github.com/me/my-app/releases/latest/download/update-macos-arm64.json" {
+	if got := c.updateFeed("darwin-arm64"); got != "https://github.com/me/my-app/releases/latest/download/update-darwin-arm64.json" {
 		t.Errorf("feed = %s", got)
 	}
 	if got := c.updateFile("my-app-1.2.0-macos-arm64.tar.gz", false); got != "https://github.com/me/my-app/releases/download/v1.2.0/my-app-1.2.0-macos-arm64.tar.gz" {
@@ -174,7 +174,7 @@ func TestUpdatesConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := c.updateFeed("windows-amd64"); got != "https://github.com/me/my-app/releases/download/desktop-v{version}/update-windows-x86_64.json" {
+	if got := c.updateFeed("windows-amd64"); got != "https://github.com/me/my-app/releases/download/desktop-v{version}/update-windows-amd64.json" {
 		t.Errorf("tagged feed = %s", got)
 	}
 	if got := c.updateFile("my-app-1.2.0-windows-x86_64.tar.gz", false); got != "https://github.com/me/my-app/releases/download/desktop-v1.2.0/my-app-1.2.0-windows-x86_64.tar.gz" {
@@ -192,7 +192,7 @@ func TestUpdatesConfig(t *testing.T) {
 		}
 	}
 	c, err = load(`{"publicKey": "` + key + `", "url": "https://dl.example.com/my-app/"}`)
-	if err != nil || c.updateFeed("linux-amd64") != "https://dl.example.com/my-app/update-linux-x86_64.json" {
+	if err != nil || c.updateFeed("linux-amd64") != "https://dl.example.com/my-app/update-linux-amd64.json" {
 		t.Errorf("url feed = %s, %v", c.updateFeed("linux-amd64"), err)
 	}
 	if _, err := load(`{"publicKey": "` + key + `", "url": "https://dl.example.com/my-app", "s3": {"bucket": "downloads", "prefix": "my-app", "endpoint": "https://acc.r2.cloudflarestorage.com"}}`); err != nil {
@@ -554,7 +554,7 @@ func TestPublishGitHub(t *testing.T) {
 	}
 	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
 	var artifacts []string
-	for _, name := range []string{"app-1.2.0-macos-universal.dmg", "app-1.2.0-macos-arm64.tar.gz", "app-1.1.0-to-1.2.0-macos-arm64.delta", "update-macos-arm64.json", "app-1.2.0-windows-x86_64-setup.exe", "App.exe"} {
+	for _, name := range []string{"app-1.2.0-macos-universal.dmg", "app-1.2.0-macos-arm64.tar.gz", "app-1.1.0-to-1.2.0-macos-arm64.delta", "update-darwin-arm64.json", "app-1.2.0-windows-x86_64-setup.exe", "App.exe"} {
 		p := filepath.Join(dist, name)
 		os.WriteFile(p, nil, 0o644)
 		artifacts = append(artifacts, p)
@@ -579,7 +579,7 @@ func TestPublishGitHub(t *testing.T) {
 	if !strings.Contains(lines[2], "app-1.2.0-macos-universal.dmg") || !strings.Contains(lines[2], "app-1.2.0-windows-x86_64-setup.exe") || !strings.Contains(lines[2], ".delta") || strings.Count(lines[2], "install.sh") != 1 || strings.Contains(lines[2], "App.exe ") || strings.Contains(lines[2], "update-") {
 		t.Errorf("first upload: %s", lines[2])
 	}
-	if !strings.HasSuffix(lines[3], "update-macos-arm64.json") {
+	if !strings.HasSuffix(lines[3], "update-darwin-arm64.json") {
 		t.Errorf("the manifests must go last: %s", lines[3])
 	}
 

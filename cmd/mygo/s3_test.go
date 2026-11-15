@@ -109,7 +109,7 @@ func TestPublishS3(t *testing.T) {
 
 	dist := t.TempDir()
 	var artifacts []string
-	for _, name := range []string{"update-macos-arm64.json", "app-1.2.0-macos-universal.dmg", "app-1.2.0-macos-arm64.tar.gz", "app-1.1.0-to-1.2.0-macos-arm64.delta", "app-1.2.0-windows-x86_64-setup.exe", "App.exe", "empty.deb", "app-1.2.0-linux-x86_64.rpm"} {
+	for _, name := range []string{"update-darwin-arm64.json", "app-1.2.0-macos-universal.dmg", "app-1.2.0-macos-arm64.tar.gz", "app-1.1.0-to-1.2.0-macos-arm64.delta", "app-1.2.0-windows-x86_64-setup.exe", "App.exe", "empty.deb", "app-1.2.0-linux-x86_64.rpm"} {
 		p := filepath.Join(dist, name)
 		content := name
 		if name == "empty.deb" {
@@ -136,7 +136,7 @@ func TestPublishS3(t *testing.T) {
 		{"/downloads/app/empty.deb", "application/vnd.debian.binary-package", ""},
 		{"/downloads/app/app-1.2.0-linux-x86_64.rpm", "application/x-rpm", ""},
 		{"/downloads/app/install.sh", "text/plain; charset=utf-8", "no-cache"},
-		{"/downloads/app/update-macos-arm64.json", "application/json", "no-cache"},
+		{"/downloads/app/update-darwin-arm64.json", "application/json", "no-cache"},
 	}
 	if !slices.Equal(put, want) {
 		t.Errorf("uploaded\n%v\nwant\n%v", put, want)

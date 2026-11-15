@@ -174,7 +174,7 @@ func TestInstallScript(t *testing.T) {
 	c.Updates = &Updates{PublicKey: base64.StdEncoding.EncodeToString(pub), URL: srv.URL, Deltas: &none}
 	c.Linux.Command = commandNames{"my-app", "ma"}
 	published := build(c, "1.1.0")
-	for _, name := range []string{"my-app-1.1.0-linux-x86_64.tar.gz", "update-linux-x86_64.json"} {
+	for _, name := range []string{"my-app-1.1.0-linux-x86_64.tar.gz", "update-linux-amd64.json"} {
 		b, err := os.ReadFile(filepath.Join(published, name))
 		if err != nil {
 			t.Fatal(err)
@@ -355,7 +355,7 @@ cat "$file"
 	}
 	release := filepath.Join(served, "desktop-v1.1.0")
 	os.MkdirAll(release, 0o755)
-	for _, name := range []string{"my-app-1.1.0-linux-x86_64.tar.gz", "update-linux-x86_64.json"} {
+	for _, name := range []string{"my-app-1.1.0-linux-x86_64.tar.gz", "update-linux-amd64.json"} {
 		b, err := os.ReadFile(filepath.Join(stage, name))
 		if err != nil {
 			t.Fatal(err)

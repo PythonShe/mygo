@@ -450,7 +450,7 @@ curl -fsSL https://github.com/me/my-app/releases/latest/download/install.sh | sh
 irm https://github.com/me/my-app/releases/latest/download/install.ps1 | iex
 ```
 
-在 macOS 上，`install.sh` 会下载 Mac 架构的更新清单指定的归档，没有时用 `macos-universal` 的（Apple silicon 的 `macos-arm64`，通过 Rosetta 运行的 shell 也一样）。下载后，它像应用的更新器那样，对照 `updates.publicKey` 校验大小和 Ed25519 签名（macOS 没有处理 Ed25519 签名的工具，所以脚本用 `openssl` 和 `shasum` 做哈希，再用 JavaScript for Automation 完成曲线运算）。如果应用正在运行，脚本会先退出它，然后替换 `/Applications` 里的应用包；如果用户无法写入 `/Applications`，或者应用本来就在 `~/Applications` 里，则替换那里的应用包，最后打开应用。它从不请求 root，同名但包标识符不同的应用不会被碰。`curl` 不设置隔离标记，所以打开应用时不会出现 Gatekeeper 对下载应用的提示。
+在 macOS 上，`install.sh` 会下载 Mac 架构的更新清单指定的归档，没有时用 `darwin-universal` 的（Apple silicon 的 `darwin-arm64`，通过 Rosetta 运行的 shell 也一样）。下载后，它像应用的更新器那样，对照 `updates.publicKey` 校验大小和 Ed25519 签名（macOS 没有处理 Ed25519 签名的工具，所以脚本用 `openssl` 和 `shasum` 做哈希，再用 JavaScript for Automation 完成曲线运算）。如果应用正在运行，脚本会先退出它，然后替换 `/Applications` 里的应用包；如果用户无法写入 `/Applications`，或者应用本来就在 `~/Applications` 里，则替换那里的应用包，最后打开应用。它从不请求 root，同名但包标识符不同的应用不会被碰。`curl` 不设置隔离标记，所以打开应用时不会出现 Gatekeeper 对下载应用的提示。
 `sh install.sh --uninstall` 移除应用并保留其设置和数据。
 
 `install.ps1` 在 Windows PowerShell 5.1 和 PowerShell 7 中运行。它下载适合 PC 架构（`amd64` 或 `arm64`）的最新版本安装程序，对照 `SHA256SUMS` 校验 SHA-256；如果应用正在运行，就先退出应用，在已安装版本的文件夹中静默运行安装程序（`/S`），然后打开应用。卸载时，仍和往常一样从“设置 > 应用”操作。

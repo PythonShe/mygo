@@ -140,7 +140,8 @@ func TestPlatform(t *testing.T) {
 			t.Errorf("Platform(%s) = %q, want %q", target, got, want)
 		}
 	}
-	if got := ManifestName("darwin-arm64"); got != "update-macos-arm64.json" {
+	// Installed apps have the name of their manifest built in.
+	if got := ManifestName("darwin-arm64"); got != "update-darwin-arm64.json" {
 		t.Errorf("ManifestName = %q", got)
 	}
 }

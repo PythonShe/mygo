@@ -30,7 +30,7 @@ import (
 // says so: an archive given to it is not checked.
 //
 // On macOS it downloads the archive of the latest version that the manifest
-// of the Mac's architecture (else of macos-universal) names, Apple silicon
+// of the Mac's architecture (else of darwin-universal) names, Apple silicon
 // even from a shell under Rosetta, checks its size and its Ed25519
 // signature against updates.publicKey, as the app's updater does, quits
 // the app if it runs, puts the bundle in /Applications,
@@ -250,8 +250,10 @@ linux() {
 	[ "$(printf '%s' "$app_dir" | tr -d '"$%\\\140\n')" = "$app_dir" ] ||
 		fail "cannot install in $app_dir: the path has characters a desktop entry cannot hold"
 	case "$(uname -m)" in
-	x86_64 | amd64) target=linux-x86_64 ;;
-	aarch64 | arm64) target=linux-arm64 ;;
+	# The archive names the CPU as users do, the manifest as Go does: the
+	# apps installed have its name built in.
+	x86_64 | amd64) target=linux-x86_64 feed=linux-amd64 ;;
+	aarch64 | arm64) target=linux-arm64 feed=linux-arm64 ;;
 	*) fail "$app_name is not made for $(uname -m)" ;;
 	esac
 
@@ -271,9 +273,9 @@ linux() {
 		if [ -n "$api" ]; then
 			tag="$(latest_tag)" || fail "could not list the releases at $api"
 			[ -n "$tag" ] || fail "no release of $app_name is published"
-			manifest="$releases$tag/update-$target.json"
+			manifest="$releases$tag/update-$feed.json"
 		else
-			manifest="${releases}update-$target.json"
+			manifest="${releases}update-$feed.json"
 		fi
 		# Fail before downloading when nothing here checks Ed25519.
 		has_ed25519 || fail "checking the signature of $app_name needs OpenSSL 3.0 or later (the openssl command): install it, or download $name-<version>-$target.tar.gz and run sh install.sh with it"
@@ -389,7 +391,7 @@ latest_tag() {
 }
 
 # macos installs the latest version on macOS, whose archive the manifest of
-# the Mac's architecture, else of macos-universal, names, after checking
+# the Mac's architecture, else of darwin-universal, names, after checking
 # its size and signature; or with --uninstall removes the installed app.
 macos() {
 	[ "$(id -u)" != 0 ] || fail "run this as the user to install $app_name for, not as root"
@@ -406,11 +408,11 @@ macos() {
 	command -v curl >/dev/null 2>&1 || fail "downloading $app_name needs curl"
 	case "$(uname -m)" in
 	arm64) arch=arm64 ;;
-	x86_64) arch=x86_64 ;;
+	x86_64) arch=amd64 ;;
 	*) fail "$app_name is not made for $(uname -m)" ;;
 	esac
 	# A shell under Rosetta sees an Intel Mac; the Mac is Apple silicon.
-	if [ "$arch" = x86_64 ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null)" = 1 ]; then
+	if [ "$arch" = amd64 ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null)" = 1 ]; then
 		arch=arm64
 	fi
 	if [ -n "$api" ]; then
@@ -420,12 +422,12 @@ macos() {
 	else
 		base="$releases"
 	fi
-	if fetch "${base}update-macos-$arch.json" >"$work/update.json" 2>/dev/null; then
-		target="macos-$arch"
-	elif fetch "${base}update-macos-universal.json" >"$work/update.json" 2>/dev/null; then
-		target=macos-universal
+	if fetch "${base}update-darwin-$arch.json" >"$work/update.json" 2>/dev/null; then
+		target="darwin-$arch"
+	elif fetch "${base}update-darwin-universal.json" >"$work/update.json" 2>/dev/null; then
+		target=darwin-universal
 	else
-		fail "could not download ${base}update-macos-$arch.json or update-macos-universal.json"
+		fail "could not download ${base}update-darwin-$arch.json or update-darwin-universal.json"
 	fi
 	latest="$(field version)"
 	url="$(field url)"

@@ -1928,7 +1928,7 @@ as in Tauri:
   installed (the bundle, else everything next to the executable) into
   `<name>-<version>-<platform>.tar.gz` (Linux builds always get it, for
   `install.sh`), signs its SHA-256, and writes
-  `update-<platform>.json` with the `## <version>` section of CHANGELOG.md as
+  `update-<target>.json` with the `## <version>` section of CHANGELOG.md as
   notes. `Updater.Check` fetches the manifest (HTTPS only, loopback HTTP for
   tests) and compares versions semantically; `Update.Install` streams the
   archive next to the app, verifies size and signature, unpacks it (files,

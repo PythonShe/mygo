@@ -19,7 +19,7 @@ import (
 func TestChecksums(t *testing.T) {
 	dist := t.TempDir()
 	var artifacts []string
-	for _, name := range []string{"app-1.2.0-macos-universal.dmg", "app-1.2.0-windows-x86_64-setup.exe", "app-1.2.0-linux-x86_64.tar.gz", "app-1.2.0-linux-x86_64.rpm", "update-linux-x86_64.json", "App.exe", "linux-amd64/install.sh", "linux-arm64/install.sh"} {
+	for _, name := range []string{"app-1.2.0-macos-universal.dmg", "app-1.2.0-windows-x86_64-setup.exe", "app-1.2.0-linux-x86_64.tar.gz", "app-1.2.0-linux-x86_64.rpm", "update-linux-amd64.json", "App.exe", "linux-amd64/install.sh", "linux-arm64/install.sh"} {
 		p := filepath.Join(dist, name)
 		os.MkdirAll(filepath.Dir(p), 0o755)
 		os.WriteFile(p, []byte("hello"), 0o644)

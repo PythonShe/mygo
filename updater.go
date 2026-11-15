@@ -74,7 +74,7 @@ var updateSource atomic.Pointer[UpdateSource]
 type UpdateSource interface {
 	// Manifest returns the manifest of the running platform: the JSON that
 	// `mygo build` writes as update-<target>.json, such as
-	// update-macos-arm64.json, of at most 1 MiB.
+	// update-darwin-arm64.json, of at most 1 MiB.
 	// prereleases reports whether the app offers them (SetPrereleases).
 	Manifest(ctx context.Context, prereleases bool) (io.ReadCloser, error)
 	// Open returns the file at url, which the manifest names: the archive
