@@ -50,9 +50,9 @@ MYGO_UPDATER_PRIVATE_KEY="$(cat path/to/mygo-update.key)" go tool mygo build   #
 
 除了各平台的安装程序，还会生成：
 
-- `my-app-1.2.0-darwin-arm64.tar.gz`，包含与安装后相同的应用文件，以应用的 [`slug`](configuration.md#应用) 命名，
-- 从之前的版本生成的[增量更新](#增量更新)，例如 `my-app-1.1.0-to-1.2.0-darwin-arm64.delta`，以及
-- `update-darwin-arm64.json`，清单：版本、发布说明、日期，以及归档和每个增量更新的 URL、大小与签名。
+- `my-app-1.2.0-macos-arm64.tar.gz`，包含与安装后相同的应用文件，像发布版本中的每个文件一样以应用的 [`slug`](configuration.md#应用) 和平台命名：`macos`、`windows` 或 `linux`，再加 `arm64`、`x86_64` 或 `universal`，
+- 从之前的版本生成的[增量更新](#增量更新)，例如 `my-app-1.1.0-to-1.2.0-macos-arm64.delta`，以及
+- `update-macos-arm64.json`，清单：版本、发布说明、日期，以及归档和每个增量更新的 URL、大小与签名。
 
 没有密钥时，`mygo build` 会构建应用，但不写更新文件；Linux 归档例外，因为 [`install.sh`](distribution.md#安装脚本) 要从它安装。`mygo build -upload` 需要密钥：它会在构建之前停下，因为已安装的应用无法更新到没有清单的发布版本。
 
@@ -64,7 +64,7 @@ MYGO_UPDATER_PRIVATE_KEY="$(cat path/to/mygo-update.key)" go tool mygo build   #
 - **S3**：`mygo build -upload` 把它们连同安装程序上传到 `updates.s3` 的存储桶；见[下文](#发布到-s3)。
 - **你自己的服务器**：把归档、增量更新和清单上传到 `url` 目录，连同 `install.sh`、`install.ps1` 和 `SHA256SUMS`（每个平台各有一行），并把较早版本的文件留在那里。最后上传清单，这样应用永远不会看到文件缺失的清单。
 
-每个平台，例如 `darwin-arm64`、`darwin-universal` 或 `windows-amd64`，都有自己的清单，而每次构建只查看自己平台的清单。
+每个平台，例如 `macos-arm64`、`macos-universal` 或 `windows-x86_64`，都有自己的清单，而每次构建只查看自己平台的清单。
 
 ### 预发布
 
@@ -169,9 +169,11 @@ func checkForUpdates(ctx context.Context) {
 type accountUpdates struct{ token string }
 
 func (s accountUpdates) Manifest(ctx context.Context, prereleases bool) (io.ReadCloser, error) {
-	// The manifest of the platform the app was built for; a universal
-	// macOS build reads update-darwin-universal.json.
-	return s.Open(ctx, "https://downloads.example.com/my-app/update-"+runtime.GOOS+"-"+runtime.GOARCH+".json")
+	// The manifest of the platform the app was built for, named as mygo
+	// build names it, such as update-macos-arm64.json; a universal macOS
+	// build reads update-macos-universal.json.
+	platform := strings.NewReplacer("darwin", "macos", "amd64", "x86_64").Replace(runtime.GOOS + "-" + runtime.GOARCH)
+	return s.Open(ctx, "https://downloads.example.com/my-app/update-"+platform+".json")
 }
 
 func (s accountUpdates) Open(ctx context.Context, url string) (io.ReadCloser, error) {

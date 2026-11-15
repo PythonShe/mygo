@@ -10,8 +10,8 @@ import (
 )
 
 func TestResolveFeed(t *testing.T) {
-	feed := TaggedFeed("me/app", "desktop-v", "update-linux-amd64.json")
-	if want := "https://github.com/me/app/releases/download/desktop-v{version}/update-linux-amd64.json"; feed != want {
+	feed := TaggedFeed("me/app", "desktop-v", "update-linux-x86_64.json")
+	if want := "https://github.com/me/app/releases/download/desktop-v{version}/update-linux-x86_64.json"; feed != want {
 		t.Fatalf("feed = %s, want %s", feed, want)
 	}
 	// The releases of the repository, newest first, a page for each list.
@@ -39,7 +39,7 @@ func TestResolveFeed(t *testing.T) {
 		rel("desktop-v1.0.0", false, false),
 	}}
 	got, err := ResolveFeed(context.Background(), feed, get)
-	if want := "https://github.com/me/app/releases/download/desktop-v1.1.0/update-linux-amd64.json"; err != nil || got != want {
+	if want := "https://github.com/me/app/releases/download/desktop-v1.1.0/update-linux-x86_64.json"; err != nil || got != want {
 		t.Errorf("ResolveFeed = %s, %v, want %s", got, err, want)
 	}
 
@@ -59,7 +59,7 @@ func TestResolveFeed(t *testing.T) {
 	}
 
 	// Other feeds are the manifest.
-	plain := "https://github.com/me/app/releases/latest/download/update-linux-amd64.json"
+	plain := "https://github.com/me/app/releases/latest/download/update-linux-x86_64.json"
 	if got, err := ResolveFeed(context.Background(), plain, nil); err != nil || got != plain {
 		t.Errorf("ResolveFeed = %s, %v", got, err)
 	}
@@ -79,8 +79,8 @@ func TestResolvePrereleaseFeed(t *testing.T) {
 	rel := func(tag string, draft, pre bool) string {
 		return fmt.Sprintf(`{"tag_name": %q, "draft": %t, "prerelease": %t}`, tag, draft, pre)
 	}
-	latest := "https://github.com/me/app/releases/latest/download/update-linux-amd64.json"
-	tagged := TaggedFeed("me/app", "desktop-v", "update-linux-amd64.json")
+	latest := "https://github.com/me/app/releases/latest/download/update-linux-x86_64.json"
+	tagged := TaggedFeed("me/app", "desktop-v", "update-linux-x86_64.json")
 	for _, c := range []struct {
 		name, feed string
 		releases   []string
@@ -88,16 +88,16 @@ func TestResolvePrereleaseFeed(t *testing.T) {
 	}{
 		{"a prerelease newer than the latest release", latest,
 			[]string{rel("v1.3.0", true, false), rel("v1.2.0-beta.2", false, true), rel("v1.2.0-beta.10", false, true), rel("v1.1.0", false, false)},
-			"https://github.com/me/app/releases/download/v1.2.0-beta.10/update-linux-amd64.json"},
+			"https://github.com/me/app/releases/download/v1.2.0-beta.10/update-linux-x86_64.json"},
 		{"a release newer than the prereleases", latest,
 			[]string{rel("v1.2.0", false, false), rel("v1.2.0-beta.2", false, true)},
-			"https://github.com/me/app/releases/download/v1.2.0/update-linux-amd64.json"},
+			"https://github.com/me/app/releases/download/v1.2.0/update-linux-x86_64.json"},
 		{"by version, not by date", latest,
 			[]string{rel("v1.1.1", false, false), rel("v1.2.0-beta.1", false, true), rel("nightly", false, true)},
-			"https://github.com/me/app/releases/download/v1.2.0-beta.1/update-linux-amd64.json"},
+			"https://github.com/me/app/releases/download/v1.2.0-beta.1/update-linux-x86_64.json"},
 		{"tagged", tagged,
 			[]string{rel("cli-v3.0.0-beta.1", false, true), rel("desktop-v2.0.0-rc.1", false, true), rel("desktop-v1.0.0", false, false)},
-			"https://github.com/me/app/releases/download/desktop-v2.0.0-rc.1/update-linux-amd64.json"},
+			"https://github.com/me/app/releases/download/desktop-v2.0.0-rc.1/update-linux-x86_64.json"},
 	} {
 		releases = c.releases
 		if got, err := ResolvePrereleaseFeed(context.Background(), c.feed, get); err != nil || got != c.want {
@@ -109,7 +109,7 @@ func TestResolvePrereleaseFeed(t *testing.T) {
 	if _, err := ResolvePrereleaseFeed(context.Background(), latest, get); !errors.Is(err, ErrNotPublished) {
 		t.Errorf("with drafts only, err = %v", err)
 	}
-	plain := "https://downloads.example.com/my-app/update-linux-amd64.json"
+	plain := "https://downloads.example.com/my-app/update-linux-x86_64.json"
 	if got, err := ResolvePrereleaseFeed(context.Background(), plain, nil); err != nil || got != plain {
 		t.Errorf("ResolvePrereleaseFeed = %s, %v", got, err)
 	}
@@ -128,7 +128,7 @@ func TestResolvePrereleaseFeedPages(t *testing.T) {
 		return rs
 	}
 	page := func(rs ...string) string { return "[" + strings.Join(rs, ",") + "]" }
-	latest := "https://github.com/me/app/releases/latest/download/update-linux-amd64.json"
+	latest := "https://github.com/me/app/releases/latest/download/update-linux-x86_64.json"
 	for _, c := range []struct {
 		name  string
 		pages []string
@@ -159,7 +159,7 @@ func TestResolvePrereleaseFeedPages(t *testing.T) {
 			}
 			return nil, fmt.Errorf("GET %s", u)
 		}
-		want := "https://github.com/me/app/releases/download/" + c.want + "/update-linux-amd64.json"
+		want := "https://github.com/me/app/releases/download/" + c.want + "/update-linux-x86_64.json"
 		if got, err := ResolvePrereleaseFeed(context.Background(), latest, get); err != nil || got != want {
 			t.Errorf("%s: ResolvePrereleaseFeed = %s, %v, want %s", c.name, got, err, want)
 		}

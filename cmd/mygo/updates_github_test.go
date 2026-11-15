@@ -39,7 +39,7 @@ func TestWriteDeltasGitHub(t *testing.T) {
 	}
 	page := func(releases ...string) string { return "[" + strings.Join(releases, ",") + "]" }
 	partial := page(
-		release("v1.2.0", "", "update-windows-amd64.json"),
+		release("v1.2.0", "", "update-windows-x86_64.json"),
 		release("v1.1.0", "", name),
 	)
 	full := make([]string, 100)
@@ -64,7 +64,7 @@ func TestWriteDeltasGitHub(t *testing.T) {
 		{name: "latest has only Windows", pages: []string{partial}, wantDeltas: 2, wantPrevious: 2, wantPages: 1},
 		{name: "tag prefix", prefix: "desktop-v", pages: []string{page(
 			release("cli-v3.0.0", "", name),
-			release("desktop-v1.2.0", "", "update-windows-amd64.json"),
+			release("desktop-v1.2.0", "", "update-windows-x86_64.json"),
 			release("desktop-v1.1.0", "", name),
 		)}, wantDeltas: 2, wantPrevious: 2, wantPages: 2},
 		{name: "eligible releases and missing assets", pages: []string{page(
@@ -75,13 +75,13 @@ func TestWriteDeltasGitHub(t *testing.T) {
 			release("v1.1.8-beta.1", `,"prerelease":true`, name),
 			release("v2.0.0", "", name),
 			release("v1.2.0", "", name),
-			release("v1.1.7", "", "update-windows-amd64.json"),
+			release("v1.1.7", "", "update-windows-x86_64.json"),
 			release("v1.1.6", "", name), // advertised but returns 404
 			release("v1.1.5", "", name), // manifest names a newer version
 			release("v1.1.0", "", name),
 		)}, wantDeltas: 2, wantPrevious: 2, wantPages: 1},
 		{name: "pagination", pages: []string{page(full...), partial}, wantDeltas: 2, wantPrevious: 2, wantPages: 2},
-		{name: "no platform release", pages: []string{page(release("v1.1.0", "", "update-windows-amd64.json"))}, wantPages: 1},
+		{name: "no platform release", pages: []string{page(release("v1.1.0", "", "update-windows-x86_64.json"))}, wantPages: 1},
 		{name: "bounded pagination", pages: slices.Repeat([]string{page(full...)}, 10), wantPages: 10},
 		{name: "latest server error", latestStatus: 503},
 		{name: "malformed latest manifest", latestStatus: 200, latestBody: "{"},

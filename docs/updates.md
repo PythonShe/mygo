@@ -73,11 +73,13 @@ MYGO_UPDATER_PRIVATE_KEY="$(cat path/to/mygo-update.key)" go tool mygo build   #
 
 Next to the installers of each platform it writes:
 
-- `my-app-1.2.0-darwin-arm64.tar.gz`, the app as installed, named after
-  the app's [`slug`](configuration.md#the-app),
+- `my-app-1.2.0-macos-arm64.tar.gz`, the app as installed, named after
+  the app's [`slug`](configuration.md#the-app) and its platform, as every
+  file of a release is: `macos`, `windows` or `linux`, then `arm64`,
+  `x86_64` or `universal`,
 - [delta updates](#delta-updates) from the versions before, such as
-  `my-app-1.1.0-to-1.2.0-darwin-arm64.delta`, and
-- `update-darwin-arm64.json`, the manifest: the version, its release
+  `my-app-1.1.0-to-1.2.0-macos-arm64.delta`, and
+- `update-macos-arm64.json`, the manifest: the version, its release
   notes, the date, and the URL, size and signature of the archive and of
   each delta.
 
@@ -109,8 +111,8 @@ Publish the files where `updates` points to:
   lines of every platform), and keep the files of earlier versions there. Upload the manifests last, so apps never see a manifest
   whose files are missing.
 
-Each platform, such as `darwin-arm64`, `darwin-universal` or
-`windows-amd64`, has its own manifest, and a build only looks at its own.
+Each platform, such as `macos-arm64`, `macos-universal` or
+`windows-x86_64`, has its own manifest, and a build only looks at its own.
 
 ### Prereleases
 
@@ -302,9 +304,11 @@ its files, and add the user's token to every request:
 type accountUpdates struct{ token string }
 
 func (s accountUpdates) Manifest(ctx context.Context, prereleases bool) (io.ReadCloser, error) {
-	// The manifest of the platform the app was built for; a universal
-	// macOS build reads update-darwin-universal.json.
-	return s.Open(ctx, "https://downloads.example.com/my-app/update-"+runtime.GOOS+"-"+runtime.GOARCH+".json")
+	// The manifest of the platform the app was built for, named as mygo
+	// build names it, such as update-macos-arm64.json; a universal macOS
+	// build reads update-macos-universal.json.
+	platform := strings.NewReplacer("darwin", "macos", "amd64", "x86_64").Replace(runtime.GOOS + "-" + runtime.GOARCH)
+	return s.Open(ctx, "https://downloads.example.com/my-app/update-"+platform+".json")
 }
 
 func (s accountUpdates) Open(ctx context.Context, url string) (io.ReadCloser, error) {

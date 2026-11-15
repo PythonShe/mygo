@@ -28,9 +28,9 @@ CLI 默认 `CGO_ENABLED=0`。如果应用的依赖需要 cgo，在环境中为 `
 
 | 平台 | `build/<os>-<arch>/` 中的内容 |
 |---|---|
-| macOS | `My App.app`，已签名，以及 `my-app-0.1.0-arm64.dmg`（`darwin/universal` 为 `my-app-0.1.0.dmg`），配置了[更新](updates.md)时还有 `install.sh` |
-| Windows | `My App.exe`、应用的文件，以及安装程序 `my-app-setup-0.1.0-amd64.exe`，配置了[更新](updates.md)时还有 [`install.ps1`](#macos-与-windows-的安装脚本) |
-| Linux | `my-app`、`my-app.desktop`、`my-app.png`、应用定义的文件类型对应的 `my-app.xml`、应用的文件、它们的归档 `my-app-0.1.0-linux-amd64.tar.gz`（含 [`install.sh`](#安装脚本)），以及 [`linux.formats`](#linux) 选出的包，默认三种全有：Debian 包 `my-app_0.1.0_amd64.deb`、RPM 包 `my-app-0.1.0-1.x86_64.rpm`，以及一个 [`PKGBUILD`](#arch-linux) 连同它安装的图标 `my-app-256x256.png` 与 `my-app-512x512.png` |
+| macOS | `My App.app`，已签名，以及 `my-app-0.1.0-macos-arm64.dmg`（`darwin/universal` 为 `my-app-0.1.0-macos-universal.dmg`），配置了[更新](updates.md)时还有 `install.sh` |
+| Windows | `My App.exe`、应用的文件，以及安装程序 `my-app-0.1.0-windows-x86_64-setup.exe`，配置了[更新](updates.md)时还有 [`install.ps1`](#macos-与-windows-的安装脚本) |
+| Linux | `my-app`、`my-app.desktop`、`my-app.png`、应用定义的文件类型对应的 `my-app.xml`、应用的文件、它们的归档 `my-app-0.1.0-linux-x86_64.tar.gz`（含 [`install.sh`](#安装脚本)），以及 [`linux.formats`](#linux) 选出的包，默认三种全有：Debian 包 `my-app-0.1.0-linux-x86_64.deb`、RPM 包 `my-app-0.1.0-linux-x86_64.rpm`，以及一个 [`PKGBUILD`](#arch-linux) 连同它安装的图标 `my-app-256x256.png` 与 `my-app-512x512.png` |
 
 其他标志：`-debug` 保留检查器等开发功能，`-skip-dmg`、`-skip-notarize` 和 `-skip-installer`（Windows 安装程序）跳过相应步骤，`-sign` 覆盖 macOS 的签名身份，`-o` 改为指定的输出目录。见 [CLI](cli.md#mygo-build)。
 
@@ -275,7 +275,7 @@ export default defineConfig(({ command }) => ({
 
 ### 安装程序
 
-`mygo build` 还会生成 `my-app-setup-1.2.0-amd64.exe`，名称取自应用的 [`slug`](configuration.md#应用)，并像磁盘映像一样包含架构，方便将不同架构的安装程序上传到同一个发布版本。它将应用安装到当前用户的 `%LOCALAPPDATA%\Programs\My App`，无需管理员权限，因此应用可以[自我更新](updates.md)；还会添加开始菜单快捷方式和“设置”中的卸载项，并注册应用的 URL 协议和文件关联。完成页提供运行应用和创建桌面快捷方式的选项，后者默认勾选；静默安装（`/S`）不创建桌面快捷方式。
+`mygo build` 还会生成 `my-app-1.2.0-windows-x86_64-setup.exe`，名称取自应用的 [`slug`](configuration.md#应用)，并像发布版本中的每个文件一样包含平台，方便将不同架构的安装程序上传到同一个发布版本。它将应用安装到当前用户的 `%LOCALAPPDATA%\Programs\My App`，无需管理员权限，因此应用可以[自我更新](updates.md)；还会添加开始菜单快捷方式和“设置”中的卸载项，并注册应用的 URL 协议和文件关联。完成页提供运行应用和创建桌面快捷方式的选项，后者默认勾选；静默安装（`/S`）不创建桌面快捷方式。
 
 快捷方式、“设置 > 应用”条目和安装程序标题默认使用应用的 `name`。如果希望可执行文件和文件夹保留简单名称，可以用 [`windows.displayName`](configuration.md#windows) 单独指定显示名称。例如，应用显示为 `天气助手`，可执行文件仍为 `%LOCALAPPDATA%\Programs\weather` 中的 `weather.exe`：
 
@@ -417,7 +417,7 @@ makepkg -si
 
 ### 安装脚本
 
-每次 Linux 构建还会生成应用归档 `my-app-1.2.0-linux-amd64.tar.gz` 和 `install.sh`，无需 root 即可安装。脚本将应用安装到 `~/.local/my-app.app`，使其可以[自我更新](updates.md)，并安装桌面条目、图标，注册 URL 协议和文件类型。配置了 `linux.command` 时，还会在 `~/.local/bin` 中创建命令链接，但不会占用其他程序已有的命令名；安装后会提示用成功创建的第一个命令启动应用。配置了[更新](updates.md)时，脚本会下载当前机器对应更新清单中的最新版本，并在安装前像应用更新器一样，校验大小，再用 `updates.publicKey` 校验 Ed25519 签名，因此一行命令即可安装应用：
+每次 Linux 构建还会生成应用归档 `my-app-1.2.0-linux-x86_64.tar.gz` 和 `install.sh`，无需 root 即可安装。脚本将应用安装到 `~/.local/my-app.app`，使其可以[自我更新](updates.md)，并安装桌面条目、图标，注册 URL 协议和文件类型。配置了 `linux.command` 时，还会在 `~/.local/bin` 中创建命令链接，但不会占用其他程序已有的命令名；安装后会提示用成功创建的第一个命令启动应用。配置了[更新](updates.md)时，脚本会下载当前机器对应更新清单中的最新版本，并在安装前像应用更新器一样，校验大小，再用 `updates.publicKey` 校验 Ed25519 签名，因此一行命令即可安装应用：
 
 ```sh
 curl -fsSL https://github.com/me/my-app/releases/latest/download/install.sh | sh
@@ -430,7 +430,7 @@ curl -fsSL https://github.com/me/my-app/releases/latest/download/install.sh | sh
 `-upload` 会把它随归档一起发布；使用 `updates.url` 时，把它发布在清单旁边。当它和对应版本的归档放在一起时（如 `build/linux-amd64/`），它会改为安装那个归档；它也会安装传给它的归档：
 
 ```sh
-sh install.sh my-app-1.2.0-linux-amd64.tar.gz
+sh install.sh my-app-1.2.0-linux-x86_64.tar.gz
 sh install.sh --uninstall   # keeps the settings and data of the app
 ```
 
@@ -450,7 +450,7 @@ curl -fsSL https://github.com/me/my-app/releases/latest/download/install.sh | sh
 irm https://github.com/me/my-app/releases/latest/download/install.ps1 | iex
 ```
 
-在 macOS 上，`install.sh` 会下载 Mac 架构的更新清单指定的归档，没有时用 `darwin-universal` 的（Apple silicon 的 `darwin-arm64`，通过 Rosetta 运行的 shell 也一样）。下载后，它像应用的更新器那样，对照 `updates.publicKey` 校验大小和 Ed25519 签名（macOS 没有处理 Ed25519 签名的工具，所以脚本用 `openssl` 和 `shasum` 做哈希，再用 JavaScript for Automation 完成曲线运算）。如果应用正在运行，脚本会先退出它，然后替换 `/Applications` 里的应用包；如果用户无法写入 `/Applications`，或者应用本来就在 `~/Applications` 里，则替换那里的应用包，最后打开应用。它从不请求 root，同名但包标识符不同的应用不会被碰。`curl` 不设置隔离标记，所以打开应用时不会出现 Gatekeeper 对下载应用的提示。
+在 macOS 上，`install.sh` 会下载 Mac 架构的更新清单指定的归档，没有时用 `macos-universal` 的（Apple silicon 的 `macos-arm64`，通过 Rosetta 运行的 shell 也一样）。下载后，它像应用的更新器那样，对照 `updates.publicKey` 校验大小和 Ed25519 签名（macOS 没有处理 Ed25519 签名的工具，所以脚本用 `openssl` 和 `shasum` 做哈希，再用 JavaScript for Automation 完成曲线运算）。如果应用正在运行，脚本会先退出它，然后替换 `/Applications` 里的应用包；如果用户无法写入 `/Applications`，或者应用本来就在 `~/Applications` 里，则替换那里的应用包，最后打开应用。它从不请求 root，同名但包标识符不同的应用不会被碰。`curl` 不设置隔离标记，所以打开应用时不会出现 Gatekeeper 对下载应用的提示。
 `sh install.sh --uninstall` 移除应用并保留其设置和数据。
 
 `install.ps1` 在 Windows PowerShell 5.1 和 PowerShell 7 中运行。它下载适合 PC 架构（`amd64` 或 `arm64`）的最新版本安装程序，对照 `SHA256SUMS` 校验 SHA-256；如果应用正在运行，就先退出应用，在已安装版本的文件夹中静默运行安装程序（`/S`），然后打开应用。卸载时，仍和往常一样从“设置 > 应用”操作。
