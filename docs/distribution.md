@@ -46,7 +46,7 @@ when cross-compiling, set `CC` to a suitable cross compiler.
 |---|---|
 | macOS | `My App.app`, signed, and `my-app-0.1.0-arm64.dmg` (`my-app-0.1.0.dmg` for `darwin/universal`), with [updates](updates.md) also `install.sh` |
 | Windows | `My App.exe`, the files of the app, and the installer `my-app-setup-0.1.0-amd64.exe`, with [updates](updates.md) also [`install.ps1`](#install-scripts-for-macos-and-windows) |
-| Linux | `my-app`, `my-app.desktop`, `my-app.png`, `my-app.xml` for the file types the app defines, the files of the app, their archive `my-app-0.1.0-linux-amd64.tar.gz` with [`install.sh`](#the-install-script), and the packages of [`linux.formats`](#linux), by default all three: the Debian package `my-app_0.1.0_amd64.deb`, the RPM package `my-app-0.1.0-1.x86_64.rpm`, and a [`PKGBUILD`](#arch-linux) with the icons it installs, `my-app-256x256.png` and `my-app-512x512.png`; with `appimage` in `linux.formats`, also the [AppImage](#appimage) `my-app-0.1.0-x86_64.AppImage` |
+| Linux | `my-app`, `my-app.desktop`, `my-app.png`, `my-app.xml` for the file types the app defines, the files of the app, their archive `my-app-0.1.0-linux-amd64.tar.gz` with [`install.sh`](#the-install-script), and the packages of [`linux.formats`](#linux), by default all three: the Debian package `my-app_0.1.0_amd64.deb`, the RPM package `my-app-0.1.0-1.x86_64.rpm`, and a [`PKGBUILD`](#arch-linux) with the icons it installs, `my-app-256x256.png` and `my-app-512x512.png`; with `appimage` in `linux.formats`, also the [AppImage](#appimage) `my-app-0.1.0-linux-x86_64.AppImage` |
 
 Other flags: `-debug` keeps development features such as the inspector,
 `-skip-dmg`, `-skip-notarize` and `-skip-installer` (the Windows
@@ -644,8 +644,8 @@ would be `yun-yin-le`.
 ### AppImage
 
 With `appimage` in [`linux.formats`](#linux), the amd64 and arm64 builds
-also get the app as an AppImage, `my-app-0.1.0-x86_64.AppImage` or
-`my-app-0.1.0-aarch64.AppImage`: one executable file that runs on most
+also get the app as an AppImage, `my-app-0.1.0-linux-x86_64.AppImage` or
+`my-app-0.1.0-linux-arm64.AppImage`: one executable file that runs on most
 distributions without being installed, from wherever the user keeps it.
 
 ```ts

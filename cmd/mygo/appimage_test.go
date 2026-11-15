@@ -66,7 +66,7 @@ func TestAppImage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const name = "note-pad-1.2.0-x86_64.AppImage"
+	const name = "note-pad-1.2.0-linux-x86_64.AppImage"
 	var names []string
 	for _, w := range written {
 		names = append(names, filepath.Base(w))

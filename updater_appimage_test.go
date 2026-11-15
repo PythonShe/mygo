@@ -58,7 +58,7 @@ func TestInstallAppImage(t *testing.T) {
 	ctx := context.Background()
 	m, key := appImageUpdate(t, newImage)
 	dir := t.TempDir()
-	target := filepath.Join(dir, "my-app-1.0.0-x86_64.AppImage")
+	target := filepath.Join(dir, "my-app-1.0.0-linux-x86_64.AppImage")
 	write := func() {
 		t.Helper()
 		if err := os.WriteFile(target, []byte("old image"), 0o750); err != nil {
@@ -147,7 +147,7 @@ func TestUpdaterAppImage(t *testing.T) {
 	packageUpdateFeed, packageUpdateKey = "https://example.com/update.json", key
 	t.Setenv("MYGO_ENV", "production")
 	dir := t.TempDir()
-	real := filepath.Join(dir, "my-app-1.0.0-x86_64.AppImage")
+	real := filepath.Join(dir, "my-app-1.0.0-linux-x86_64.AppImage")
 	if err := os.WriteFile(real, []byte("old image"), 0o755); err != nil {
 		t.Fatal(err)
 	}

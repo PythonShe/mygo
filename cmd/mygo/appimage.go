@@ -38,11 +38,15 @@ var appImageRuntime = struct {
 	},
 }
 
-// appImageFileName is "<slug>-<version>-<arch>.AppImage", as
-// "my-app-0.1.0-x86_64.AppImage", with AppImage's name of the
-// architecture, as AppImages are named.
+// appImageFileName is "<slug>-<version>-linux-<arch>.AppImage", as
+// "my-app-0.1.0-linux-x86_64.AppImage" or "my-app-0.1.0-linux-arm64.AppImage",
+// named after the platform as the other files of a release are (#1900).
 func appImageFileName(c *Config, goarch string) string {
-	return c.slug() + "-" + c.Version + "-" + appImageArch[goarch] + ".AppImage"
+	arch := goarch
+	if goarch == "amd64" {
+		arch = "x86_64"
+	}
+	return c.slug() + "-" + c.Version + "-linux-" + arch + ".AppImage"
 }
 
 // appImageRun is the AppDir's AppRun, which the runtime runs: it runs the
