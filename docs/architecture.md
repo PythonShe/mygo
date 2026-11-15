@@ -1946,7 +1946,13 @@ as in Tauri:
   without a list stay, and so does the running executable. Deltas never
   make the list from the installed one, which the updater rewrote.
   `App.Relaunch` then starts the new version from the path the app
-  started from. Development builds are never updated. Delta updates work
+  started from. An app running as an AppImage (`APPIMAGE`, in a build
+  with `packageAppImage`) replaces the AppImage instead, whose mounted
+  image cannot be written: `installAppImage` downloads the manifest's
+  `appImage` next to it, checks its size and signature and renames it
+  onto the file, through a link the app was started by; `Check` offers no
+  release without one, and `Relaunch` starts the AppImage, not the
+  executable in the mount, which goes when the app exits. Development builds are never updated. Delta updates work
   as Sparkle's (`internal/update/delta.go`): `mygo build` fetches the
   published manifest of the target, downloads the archives of up to
   `updates.deltas` versions (that manifest's, and those it lists as

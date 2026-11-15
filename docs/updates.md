@@ -261,7 +261,8 @@ func checkForUpdates(ctx context.Context) {
 
 - `Check` returns the newer version, with its `Version`, `Notes` and
   `Date`, or nil when the app is up to date.
-- `Install` downloads the archive, or the delta of the running version,
+- `Install` downloads the archive, or the delta of the running version
+  (the AppImage of an app running as one),
   checks its signature, and replaces the app. The progress callback gets
   the bytes of the delta, and when the delta fails, starts over with those
   of the archive. The running app is not affected: the new version runs
@@ -345,7 +346,11 @@ An app replaces itself, so it must be able to write where it is installed:
   in `%LOCALAPPDATA%\Programs`.
 - Linux: a directory of the user, such as `~/.local/my-app.app`, where
   [`install.sh`](distribution.md#the-install-script) installs the app, or
-  the extracted build.
+  the extracted build; or the folder of the
+  [AppImage](distribution.md#appimage) the app runs as, which an update
+  replaces at the same path with the new version's, when `linux.formats`
+  has `appimage`. The AppImage of an app whose releases have none keeps
+  updates off.
 
 Apps installed by a package manager, such as the Debian package in
 `/opt`, are updated by it instead: `Enabled` is false for them.
