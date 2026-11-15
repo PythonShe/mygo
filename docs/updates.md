@@ -104,7 +104,7 @@ Publish the files where `updates` points to:
   "Set as the latest release", and apps find it by its tag.
 - **S3**: `mygo build -upload` uploads them, with the installers, to the
   bucket of `updates.s3`; see [below](#publishing-to-s3).
-- **Your server**: upload the archives, deltas and manifests to the `url`
+- **Your server**: upload the archives, deltas, AppImages and manifests to the `url`
   directory, with `install.sh`, `install.ps1` and `SHA256SUMS` (with the
   lines of every platform), and keep the files of earlier versions there. Upload the manifests last, so apps never see a manifest
   whose files are missing.

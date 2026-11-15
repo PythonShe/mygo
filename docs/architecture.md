@@ -6383,8 +6383,18 @@ make it work:
   Debian dependencies through `archPackages` and `rpmPackages`, warning
   about those they lack, and `options` keeps the executable unstripped. Every
   value is quoted for the shell, and `-upload` leaves it out (`uploads`
-  takes only known kinds). `linux.formats` chooses which of the three
-  packages a build writes (`writeLinuxPackages`), all by default; the
+  takes only known kinds). With `appimage` in `linux.formats`, amd64 and
+  arm64 also get an AppImage (`appimage.go`): the static runtime of
+  AppImage/type2-runtime, downloaded into the cache and pinned by its
+  SHA-256 (`appImageRuntime`), followed by a SquashFS image written in
+  pure Go (`internal/squashfs`, zstd, without fragments; tests read it
+  back with `internal/squashfs/squashfstest`) of the app's directory, an
+  `AppRun` script that runs the executable by its path, so that its
+  WM_CLASS is the executable's, `.DirIcon` and the hicolor icons.
+  It is written before the archive, whose manifest names it signed
+  (`appImage`), and Linux builds of such apps get
+  `packageAppImage=1`. `linux.formats` chooses which packages a build
+  writes (`writeLinuxPackages`), all but the AppImage by default; the
   archive is always written. Packages hold the same files as
   the update archive; apps installed by a package manager do not update
   themselves (`Updater.Enabled` checks that the app can write where it is
