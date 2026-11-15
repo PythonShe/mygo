@@ -9,6 +9,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -74,9 +75,15 @@ func TestAppImage(t *testing.T) {
 		t.Fatalf("wrote %q with the runtimes of %q, want %q", names, archs, want)
 	}
 
+	// Windows has no executable bit: a stage there has no executables, as
+	// the archive and the DEB built there have none.
+	exe := os.FileMode(0o755)
+	if runtime.GOOS == "windows" {
+		exe = 0o644
+	}
 	path := filepath.Join(stage, name)
 	info, err := os.Stat(path)
-	if err != nil || info.Mode().Perm() != 0o755 {
+	if err != nil || runtime.GOOS != "windows" && info.Mode().Perm() != 0o755 {
 		t.Fatalf("AppImage %v %v, want it executable", info, err)
 	}
 	b, _ := os.ReadFile(path)
@@ -92,7 +99,7 @@ func TestAppImage(t *testing.T) {
 		}
 		return e.Data
 	}
-	if file("note-pad", 0o755) != "the app" || file("resources/fonts/a.ttf", 0o644) != "font" {
+	if file("note-pad", exe) != "the app" || file("resources/fonts/a.ttf", 0o644) != "font" {
 		t.Error("the app's files differ")
 	}
 	if d := file("note-pad.desktop", 0o644); !strings.Contains(d, "Exec=note-pad") || !strings.Contains(d, "Icon=note-pad") {
