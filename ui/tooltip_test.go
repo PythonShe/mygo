@@ -116,13 +116,103 @@ func TestTooltipFocus(t *testing.T) {
 	if !tt.HasText("Opens a file") {
 		t.Error("no tip as the focus comes back after Escape")
 	}
-	// A disabled element shows none.
+	// A disabled element under the pointer still shows its tip, the
+	// pointer coming to it after the focus came to Open.
 	disabled = true
-	tt.Frame()
+	tick(time.Second)
 	tt.Move(b.X+b.W/2, b.Y+b.H/2)
 	tick(time.Second)
-	if tt.HasText("Saves the file") {
-		t.Error("a disabled element shows its tip")
+	if !tt.HasText("Saves the file") {
+		t.Errorf("a disabled element under the pointer shows no tip; texts %q", tt.Texts())
+	}
+}
+
+// TestTooltipDisabled checks that a disabled element shows its tip under
+// the pointer, as AppKit's and GTK's do, to tell why it is disabled, while
+// it still takes no click and no focus: Tab passes it, and an element
+// disabled while it has the focus shows no tip for it.
+func TestTooltipDisabled(t *testing.T) {
+	disabled, clicks, off, reach := true, 0, false, false
+	tt, now := clockTester(func(c *context) {
+		coreColumn(c).Padding(40).Gap(20).Children(func() {
+			coreButton(c, "Open").Tooltip("Opens a file").Disabled(off)
+			if coreButton(c, "Commit").Tooltip("Stage changes to commit").Disabled(disabled && !reach).AccessDisabled(reach).Clicked() {
+				clicks++
+			}
+			coreFieldset(c, "Remote", func() {
+				coreButton(c, "Push").Tooltip("Nothing to push")
+			}).Disabled(disabled)
+			coreBox(c).Padding(8).Tooltip("Ask for access").Children(func() {
+				coreButton(c, "Delete").Tooltip("Delete the branch").Disabled(true)
+			})
+		})
+	}, 400, 400)
+	tick := ticker(tt, now)
+	b, _ := tt.Find("Commit")
+	tt.Move(b.X+b.W/2, b.Y+b.H/2)
+	tick(500 * time.Millisecond)
+	if tt.HasText("Stage changes to commit") {
+		t.Fatal("the tip shows before the pointer rested")
+	}
+	tick(150 * time.Millisecond)
+	if !tt.HasText("Stage changes to commit") {
+		t.Fatalf("no tip on the disabled button; texts %q", tt.Texts())
+	}
+	// A press takes no click and hides the tip, as on an enabled one.
+	tt.ClickAt(b.X+b.W/2, b.Y+b.H/2)
+	tick(time.Second)
+	if clicks != 0 || tt.Focused("Commit") {
+		t.Fatalf("the disabled button took the click (%d) or the focus", clicks)
+	}
+	if tt.HasText("Stage changes to commit") {
+		t.Error("the tip shows after a press")
+	}
+	// Inside a disabled Fieldset too.
+	p, _ := tt.Find("Push")
+	tt.Move(p.X+p.W/2, p.Y+p.H/2)
+	tick(time.Second)
+	if !tt.HasText("Nothing to push") {
+		t.Errorf("no tip in a disabled fieldset; texts %q", tt.Texts())
+	}
+	// Over elements inside one another, the innermost one's tip shows,
+	// disabled or not: a reason belongs on the disabled element itself.
+	d, _ := tt.Find("Delete")
+	tt.Move(d.X+d.W/2, d.Y+d.H/2)
+	tick(time.Second)
+	if !tt.HasText("Delete the branch") || tt.HasText("Ask for access") {
+		t.Errorf("a disabled element inside one with a tip; texts %q", tt.Texts())
+	}
+	// The keyboard passes it.
+	tt.Move(390, 390)
+	tick(time.Second)
+	tt.Key(0, KeyTab)
+	tt.Key(0, KeyTab)
+	if !tt.Focused("Open") || tt.HasText("Stage changes to commit") {
+		t.Errorf("Tab reached the disabled button; texts %q", tt.Texts())
+	}
+	// An element disabled with the focus shows no tip for it, from the
+	// frame after the one that disabled it.
+	off = true
+	tick(time.Second)
+	tick(time.Second)
+	if tt.HasText("Opens a file") {
+		t.Error("an element disabled with the focus shows its tip for it")
+	}
+	// AccessDisabled keeps it in the Tab order, its tip showing for the
+	// focus.
+	off = false
+	reach = true
+	tick(time.Second)
+	tt.Key(0, KeyTab)
+	tick(time.Second)
+	if !tt.Focused("Commit") || !tt.HasText("Stage changes to commit") {
+		t.Errorf("AccessDisabled: focus on Commit %v; texts %q", tt.Focused("Commit"), tt.Texts())
+	}
+	reach = false
+	tick(time.Second)
+	// Assistive technology reads the tip as its description, disabled.
+	if info, ok := tt.Access("Commit"); !ok || info.Description != "Stage changes to commit" || !info.Disabled {
+		t.Errorf("the disabled button for assistive technology: %+v", info)
 	}
 }
 
