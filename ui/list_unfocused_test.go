@@ -15,7 +15,7 @@ func TestListSelectionGraysWithoutFocus(t *testing.T) {
 	a, b := 1, 2
 	sa, sb := ListState{Selected: &a}, ListState{Selected: &b}
 	rows := map[string]*node{}
-	var focusedA, selectedA bool
+	var focusedA, selectedA, emphasizedA bool
 	var theme *Theme
 	tt := coreNewTester(func(c *context) {
 		theme = c.theme
@@ -24,6 +24,7 @@ func TestListSelectionGraysWithoutFocus(t *testing.T) {
 				rows[fmt.Sprintf("a%d", i)] = coreTextf(c, "a%d", i).parent
 				if i == 1 {
 					focusedA, selectedA = c.row.f.owner.FocusWithin(), c.row.chosen
+					emphasizedA = sa.coreEmphasized(c)
 				}
 			}).Width(150)
 			coreList(c, &sb, 5, func(i int) {
@@ -48,8 +49,8 @@ func TestListSelectionGraysWithoutFocus(t *testing.T) {
 	if !accent("a1") || !gray("b2") {
 		t.Fatalf("list a has the focus: a1 accent %v, b2 gray %v", accent("a1"), gray("b2"))
 	}
-	if !focusedA || !selectedA {
-		t.Errorf("a row of the focused list reads focused %v, chosen %v", focusedA, selectedA)
+	if !focusedA || !selectedA || !emphasizedA {
+		t.Errorf("a row of the focused list reads focused %v, chosen %v, emphasized %v", focusedA, selectedA, emphasizedA)
 	}
 	// A window drawn inactive fades the focused list's accent, as before.
 	tt.SetWindowActive(false)
@@ -63,8 +64,8 @@ func TestListSelectionGraysWithoutFocus(t *testing.T) {
 	if !gray("a1") || !accent("b2") {
 		t.Fatalf("list b has the focus: a1 gray %v, b2 accent %v", gray("a1"), accent("b2"))
 	}
-	if focusedA {
-		t.Error("a row of the list without the focus reads it focused")
+	if focusedA || emphasizedA {
+		t.Errorf("a row of the list without the focus reads focused %v, emphasized %v", focusedA, emphasizedA)
 	}
 	// The gray row takes no hover color over it, as painted.
 	r := rows["a1"].st
@@ -149,6 +150,7 @@ func TestTableRowsAndOutlineGrayWithoutFocus(t *testing.T) {
 	var os OutlineState[string]
 	os.List.Selected = &osel
 	var trow, orow *node
+	var oemph bool
 	var theme *Theme
 	tt := coreNewTester(func(c *context) {
 		theme = c.theme
@@ -165,6 +167,7 @@ func TestTableRowsAndOutlineGrayWithoutFocus(t *testing.T) {
 				coreText(c, baseName(path))
 				if path == "src" {
 					orow = c.row.e
+					oemph = os.List.coreEmphasized(c)
 				}
 			}).Grow(1)
 		})
@@ -178,13 +181,13 @@ func TestTableRowsAndOutlineGrayWithoutFocus(t *testing.T) {
 	if err := tt.Click("src"); err != nil {
 		t.Fatal(err)
 	}
-	if trow.bg != theme.SurfacePressed || orow.bg != theme.Accent || arrowColor(theme, orow, os.List.frame.emphasized()) != theme.AccentText {
+	if trow.bg != theme.SurfacePressed || orow.bg != theme.Accent || arrowColor(theme, orow, os.List.frame.emphasized()) != theme.AccentText || !oemph {
 		t.Fatalf("focused outline: table row %v, outline row %v, arrow %v", trow.bg, orow.bg, arrowColor(theme, orow, os.List.frame.emphasized()))
 	}
 	if err := tt.Click("field"); err != nil {
 		t.Fatal(err)
 	}
-	if orow.bg != theme.SurfacePressed || arrowColor(theme, orow, os.List.frame.emphasized()) != theme.TextMuted {
+	if orow.bg != theme.SurfacePressed || arrowColor(theme, orow, os.List.frame.emphasized()) != theme.TextMuted || oemph {
 		t.Errorf("outline without the focus: row %v, arrow %v", orow.bg, arrowColor(theme, orow, os.List.frame.emphasized()))
 	}
 }
@@ -200,6 +203,7 @@ func TestTableCellsGrayWithoutFocus(t *testing.T) {
 	value := ""
 	var cell *node
 	var theme *Theme
+	var emphasized bool
 	tt := coreNewTester(func(c *context) {
 		theme = c.theme
 		coreColumn(c).Fill().Children(func() {
@@ -208,6 +212,7 @@ func TestTableCellsGrayWithoutFocus(t *testing.T) {
 				n := coreTextf(c, "r%dc%d", row, col)
 				if row == 1 && col == 2 {
 					cell = n.parent
+					emphasized = s.CellSelected(row, col) && s.coreEmphasized(c)
 				}
 			}).Grow(1)
 		})
@@ -215,19 +220,19 @@ func TestTableCellsGrayWithoutFocus(t *testing.T) {
 	if err := tt.Click("r1c2"); err != nil {
 		t.Fatal(err)
 	}
-	if cell.bg != theme.Accent || cell.ts.color != theme.AccentText {
-		t.Fatalf("focused table: the cell shows %v under %v", cell.bg, cell.ts.color)
+	if cell.bg != theme.Accent || cell.ts.color != theme.AccentText || !emphasized {
+		t.Fatalf("focused table: the cell shows %v under %v, emphasized %v", cell.bg, cell.ts.color, emphasized)
 	}
 	if err := tt.Click("field"); err != nil {
 		t.Fatal(err)
 	}
-	if cell.bg != theme.SurfacePressed || cell.ts.set&setColor != 0 || cell.checked != 2 {
-		t.Fatalf("table without the focus: the cell shows %v, its text set %v, checked %d", cell.bg, cell.ts.set&setColor != 0, cell.checked)
+	if cell.bg != theme.SurfacePressed || cell.ts.set&setColor != 0 || cell.checked != 2 || emphasized {
+		t.Fatalf("table without the focus: the cell shows %v, its text set %v, checked %d, emphasized %v", cell.bg, cell.ts.set&setColor != 0, cell.checked, emphasized)
 	}
 	s.KeepAccent = true
 	tt.Frame()
-	if cell.bg != theme.Accent || cell.ts.color != theme.AccentText {
-		t.Fatalf("KeepAccent without the focus: the cell shows %v under %v", cell.bg, cell.ts.color)
+	if cell.bg != theme.Accent || cell.ts.color != theme.AccentText || !emphasized {
+		t.Fatalf("KeepAccent without the focus: the cell shows %v under %v, emphasized %v", cell.bg, cell.ts.color, emphasized)
 	}
 	s.KeepAccent = false
 	s.CellsStyle = CellsStyle{Cell: Hex("#ffeeaa"), CellText: Hex("#112233")}

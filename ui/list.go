@@ -468,6 +468,23 @@ func (s *ListState) coreFocused(c *context) bool { return s.current(c).Focused()
 // it before List returns, without saving an Element from an earlier frame.
 func (s *ListState) coreFocusWithin(c *context) bool { return s.current(c).FocusWithin() }
 
+// Emphasized reports whether the List, Table or Outline using s shows its
+// chosen rows and cells in the accent, with the accent's text color: while
+// it has the focus, or a menu or popover opened from it does, and always
+// with KeepAccent; otherwise they show in gray, with the text's own color.
+// It has the same lifetime as Focused. Builders of cells, of an Outline's
+// items and of rows given to List as a function read it, with what tells
+// them they are chosen, for text of a color of its own to show on the
+// accent, as ListRow.Emphasized tells a row of Rows:
+//
+//	color := c.Theme().TextMuted
+//	if app.grid.CellSelected(row, col) && app.grid.Emphasized(c) {
+//		color = c.Theme().AccentText
+//	}
+func (s *ListState) coreEmphasized(c *context) bool {
+	return s.current(c) != nil && s.frame.emphasized()
+}
+
 // Focus gives the list the keyboard focus and reports whether it was
 // built in the current pass of c. A pending focus request can wait until
 // a hidden list returns:

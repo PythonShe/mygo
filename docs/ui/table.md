@@ -77,8 +77,10 @@ table has the focus. A cell holding the focus, as an editor in it, shows as
 it is. Chosen rows are not tinted whole. `SelectedColumns` returns the
 block's column IDs in the order shown, and `SelectColumns` chooses every row
 and a range of columns, for the app's own commands. `CellSelected(row, col)`
-tells a cell builder whether its cell is chosen, and with `FocusWithin(c)`
-whether it shows in the accent, for text of its own color to show on it.
+tells a cell builder whether its cell is chosen, and with `Emphasized(c)`
+whether it shows in the accent, for text of its own color to show on it;
+a block in `CellsStyle`'s colors, and a cell holding the focus, show as
+they do whatever it says.
 `KeepAccent` keeps the accent while the table does not have the focus. A
 cell that reads its
 row's click with `RowClicked`, or its double click with `RowDoubleClicked`,
@@ -110,7 +112,7 @@ ui.Table(c, &app.grid, cols, len(rows), func(row, col int) {
 	if text == "" {
 		text, color = "empty", c.Theme().TextMuted
 	}
-	if app.grid.CellSelected(row, col) && app.grid.FocusWithin(c) {
+	if app.grid.CellSelected(row, col) && app.grid.Emphasized(c) {
 		color = c.Theme().AccentText // muted does not show on the accent
 	}
 	ui.Text(c, text).TextColor(color).SingleLine()

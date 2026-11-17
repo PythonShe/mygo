@@ -385,17 +385,17 @@ ui.List(c.Key("files"), &app.list, len(app.files)).Grow(1).
 ```
 
 Chosen rows show in the accent, with the accent's text color, only while
-the list or something in it has the focus, or a menu or popover opened
-from it does (a dialog takes the keys, and the list goes gray); in a list
-without it they show
-in the theme's `SurfacePressed`, a gray, with the text's own color, as
-AppKit's tables and the [sidebar](sidebar.md) do. With two lists on
-screen, as a history and the files of the commit chosen in it, the one the
-keys move is the one in the accent. Text given a color of its own follows
-`row.Emphasized()`, as above, to show on the accent. A Table's cells chosen
-do the same. `KeepAccent` keeps the accent without the focus, for a list
-whose keys another control takes, as the results under a launcher's search
-field.
+the list or something in it has the focus, or a menu or popover opened from
+it does (a dialog takes the keys, and the list goes gray); in a list
+without it they show in the theme's `SurfacePressed`, a gray, with the
+text's own color, as AppKit's tables and the [sidebar](sidebar.md) do. With
+two lists on screen, as a history and the files of the commit chosen in it,
+the one the keys move is the one in the accent. Text given a color of its
+own follows `row.Emphasized()`, as above, to show on the accent; a Table's
+cells, an Outline's items and rows given to `List` as a function read
+`ListState.Emphasized(c)` with what tells them they are chosen.
+`KeepAccent` keeps the accent without the focus, for a list whose keys
+another control takes, as the results under a launcher's search field.
 
 Call `app.list.Handle.Focus()` on the UI thread to request focus, or
 `Focus(c)` to select a window explicitly. `Focused(c)` reports focus on the
