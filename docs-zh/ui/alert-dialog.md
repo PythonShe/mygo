@@ -28,7 +28,7 @@ if ui.AlertDialog(c, &app.updating, "Update required", "Restart to finish updati
 
 ## 破坏性操作
 
-`ui.AlertDialogButtons` 接收 `ui.AlertButton`，其中标为 `Destructive` 的按钮用于删除数据或无法撤销的操作，类似 AppKit 设置了 `hasDestructiveAction` 的警告框：它们的标签使用主题的 `Danger` 颜色，并且永远不会成为默认按钮。默认按钮是最后一个非破坏性按钮，例如“取消”，这样按 Enter 会保留数据。所有按钮都是破坏性按钮的警告框没有默认按钮：焦点停在警告框本身，按 Enter 不会触发任何按钮。与其他按钮一样，只有当用户用 Tab 把焦点移到破坏性按钮上之后，Enter 才会触发它。
+`ui.AlertDialogButtons` 接收 `ui.AlertButton`，其中标为 `Destructive` 的按钮用于删除数据或无法撤销的操作，类似 AppKit 设置了 `hasDestructiveAction` 的警告框：它们的标签使用主题的 `Danger` 颜色，并且永远不会成为默认按钮。默认按钮是最后一个非破坏性按钮，例如“取消”，这样按 Enter 会保留数据。所有按钮都是破坏性按钮的警告框没有默认按钮：焦点停在警告框本身，按 Enter 不会触发任何按钮。与其他按钮一样，只有当用户用 Tab 把焦点移到破坏性按钮上之后，Enter 才会触发它。颜色本身不会告诉使用辅助技术的用户任何信息：让标签说明按钮做什么，例如用“Delete”而不是“OK”。
 
 ```go
 switch ui.AlertDialogButtons(c, &app.asking, "Delete “Notes”?", "You can't undo this.",

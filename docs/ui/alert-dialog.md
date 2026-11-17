@@ -47,7 +47,9 @@ AppKit's alerts with `hasDestructiveAction`: the default is the last button
 that is not destructive, as Cancel, so that Enter keeps the data. An alert
 whose buttons are all destructive has no default: it holds the focus
 itself, and Enter clicks none. A destructive button takes Enter, as any
-button does, only once the user moves the focus to it with Tab.
+button does, only once the user moves the focus to it with Tab. The color
+alone tells no one using assistive technology: let the label say what the
+button does, as "Delete" rather than "OK".
 
 ```go
 switch ui.AlertDialogButtons(c, &app.asking, "Delete “Notes”?", "You can't undo this.",

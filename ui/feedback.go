@@ -190,7 +190,9 @@ type AlertButton struct {
 	// for an action that deletes data or can't be undone, as AppKit's
 	// alerts with hasDestructiveAction, and keeps it from being the
 	// default: it never has the focus as the alert opens, so Enter clicks
-	// it only once the user moves the focus to it.
+	// it only once the user moves the focus to it. The color alone tells
+	// no one using assistive technology: let the label say what the
+	// button does, as "Delete" rather than "OK".
 	Destructive bool
 }
 
