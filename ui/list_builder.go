@@ -12,7 +12,19 @@ type ListRow struct {
 	selected bool
 }
 
-func (r ListRow) Selected() bool    { return r.owner.Valid() && r.selected }
+// Selected reports whether the row is chosen. A chosen row shows in the
+// accent with the accent's text color while the list has the focus
+// (ListFocused), and in gray with the text's own color otherwise: text
+// of a color of its own shows on the accent only when both hold.
+//
+//	dir := ui.Text(row.Context, file.Dir).TextColor(t.TextMuted)
+//	if row.Selected() && row.ListFocused() {
+//		dir.TextColor(t.AccentText)
+//	}
+func (r ListRow) Selected() bool { return r.owner.Valid() && r.selected }
+
+// ListFocused reports whether the list or one of its descendants has the
+// keyboard focus, which shows its chosen rows in the accent.
 func (r ListRow) ListFocused() bool { return r.owner.FocusWithin() }
 
 // Hovered reports whether the pointer is over the row, as Element.Hovered

@@ -79,7 +79,9 @@ type ListState struct {
 	// Selected, when set, lets a click choose a row, as Up, Down, Home and
 	// End do while the list has the keyboard focus, and Page Up and Page
 	// Down on Linux and Windows: *Selected is the chosen row, -1 for none,
-	// which shows in the accent color. The list's Changed reports a new
+	// which shows in the accent color while the list has the focus (or a
+	// menu or popover opened from it does) and in gray otherwise. The
+	// list's Changed reports a new
 	// choice, and its Submitted a double click or Enter. With a Key, the
 	// choice follows its item as rows come and go, and becomes -1 when the
 	// item is no longer among the rows: the list writes that as it builds,
@@ -505,6 +507,8 @@ type listFrame struct {
 	// owner takes the focus and reports choices: the list, or its Table.
 	owner *node
 	s     *ListState
+	// emph caches emphasized for the pass: 0 not asked, 1 false, 2 true.
+	emph  int8
 	n     int
 	row   func(i int)
 	frame uint64
@@ -797,6 +801,50 @@ func (s *ListState) plan(e *node, n int) (a, first, last int) {
 	return a, max(0, first-listOverscan), min(n, last+listOverscan)
 }
 
+// emphasized reports whether the list shows its chosen rows in the
+// accent: while the focus is in it or in an overlay opened from it
+// (focusOwned). It asks once a pass.
+func (f *listFrame) emphasized() bool {
+	if f.emph == 0 {
+		f.emph = 1
+		if f.owner.focusOwned() {
+			f.emph = 2
+		}
+	}
+	return f.emph == 2
+}
+
+// focusOwned reports whether the element or one of its descendants has
+// the keyboard focus, or a popover attached to one of them does, as a
+// menu opened from a row: a list keeps its accent while the menu shows,
+// as AppKit's tables do, which a menu takes no first responder from. A
+// dialog, which takes the keys as AppKit's sheets do, does not count.
+func (e *node) focusOwned() bool {
+	if e.FocusWithin() {
+		return true
+	}
+	rt := e.c.rt
+	id := rt.focused
+	// A popover opened from a popover's item, as a submenu, leads back
+	// step by step; the bound stops a cycle.
+	for range 8 {
+		i := slices.Index(rt.focusOrder, id)
+		if i < 0 || i >= len(rt.focusScopes) || rt.focusScopes[i].anchor == 0 {
+			return false
+		}
+		id = rt.focusScopes[i].anchor
+		for s := rt.states[id]; s != nil; s = rt.states[s.parent] {
+			if s.id == e.id {
+				return true
+			}
+			if s.parent == 0 {
+				break
+			}
+		}
+	}
+	return false
+}
+
 // build builds row i in the list.
 func (f *listFrame) build(i int) *node {
 	c, s := f.c, f.s
@@ -850,6 +898,12 @@ func (f *listFrame) build(i int) *node {
 			case !on && st.Stripe != Transparent && i%2 == 1:
 				w.Background(st.Stripe)
 			}
+		} else if on && !f.emphasized() {
+			// Chosen in a list without the focus, in gray with the text's
+			// own color, as AppKit's tables and Sidebar: the accent shows
+			// which list the keys move.
+			w.checked = 2
+			w.Background(t.SurfacePressed)
 		} else {
 			w.Selected(on)
 		}

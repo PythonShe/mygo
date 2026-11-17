@@ -164,9 +164,9 @@ ui.List(c.Key("files"), &a.list, len(a.files)).Bind(&a.filesView).Grow(1).
     ItemKey(func(i int) any { return a.files[i].ID }).
     Selection(&a.selection).
     Rows(func(row ui.ListRow) {
-        text := ui.Text(row.Context, a.files[row.Index].Name)
+        dir := ui.Text(row.Context, a.files[row.Index].Dir).TextColor(c.Theme().TextMuted)
         if row.Selected() && row.ListFocused() {
-            text.TextColor(c.Theme().Accent)
+            dir.TextColor(c.Theme().AccentText)
         }
     })
 ```

@@ -78,11 +78,9 @@ func (rt *engine) buildInspector(c *context, appW, w, h float32) {
 	t.Text, t.TextMuted, t.FontSize = pal.text, pal.muted, 12
 	// Rows chosen span the tree, square, as Chrome's.
 	t.Radius = 0
-	// The tree's chosen row, in its colors, whether the tree has the focus.
-	t.Accent, t.AccentText = pal.unfocused, pal.text
-	if rt.focused == in.listID && in.listID != 0 {
-		t.Accent = pal.selected
-	}
+	// The tree's chosen row, in its colors: a list fills it with the
+	// accent while it has the focus and with SurfacePressed otherwise.
+	t.Accent, t.AccentText, t.SurfacePressed = pal.selected, pal.text, pal.unfocused
 	saved, savedParent := c.theme, c.parent
 	c.theme, c.parent = t, c.root
 	defer func() { c.theme, c.parent = saved, savedParent }()
