@@ -185,10 +185,15 @@ func TestTooltipDisabled(t *testing.T) {
 	// The keyboard passes it.
 	tt.Move(390, 390)
 	tick(time.Second)
-	tt.Key(0, KeyTab)
-	tt.Key(0, KeyTab)
-	if !tt.Focused("Open") || tt.HasText("Stage changes to commit") {
-		t.Errorf("Tab reached the disabled button; texts %q", tt.Texts())
+	for i := range 3 {
+		tt.Key(0, KeyTab)
+		tick(time.Second)
+		if tt.Focused("Commit") || tt.HasText("Stage changes to commit") {
+			t.Fatalf("Tab %d reached the disabled button; texts %q", i+1, tt.Texts())
+		}
+	}
+	if !tt.Focused("Open") {
+		t.Error("Tab left the focus off Open, the one element it can reach")
 	}
 	// An element disabled with the focus shows no tip for it, from the
 	// frame after the one that disabled it.
@@ -214,6 +219,71 @@ func TestTooltipDisabled(t *testing.T) {
 	if info, ok := tt.Access("Commit"); !ok || info.Description != "Stage changes to commit" || !info.Disabled {
 		t.Errorf("the disabled button for assistive technology: %+v", info)
 	}
+}
+
+// TestTooltipDisabledMenuItemAndHistory checks the disabled elements
+// MyGo draws itself with tips of their own: a drawn menu's disabled item,
+// and the router's Back and Forward buttons at either end of the history.
+func TestTooltipDisabledMenuItemAndHistory(t *testing.T) {
+	t.Run("menu item", func(t *testing.T) {
+		const tip = "Select a query to run it"
+		tt, now := clockTester(func(c *context) {
+			coreRow(c).Padding(20).Children(func() { coreText(c, "Report.pdf") }).PopoverMenu(func(m *Menu) {
+				m.Item("Open")
+				m.Item("Run").Disabled(true).Tooltip(tip)
+			})
+		}, 400, 300)
+		tick := ticker(tt, now)
+		if err := tt.RightClick("Report.pdf"); err != nil {
+			t.Fatal(err)
+		}
+		r, ok := tt.Find("Run")
+		if !ok {
+			t.Fatal("no drawn item Run")
+		}
+		tt.Move(r.X+r.W/2, r.Y+r.H/2)
+		tick(700 * time.Millisecond)
+		if !tt.HasText(tip) {
+			t.Fatalf("no tip on the disabled item; texts %q", tt.Texts())
+		}
+	})
+	t.Run("history", func(t *testing.T) {
+		r := NewRouter("/")
+		r.Transition = TransitionNone
+		tt, now := clockTester(func(c *context) {
+			coreRow(c).Padding(40).Children(func() {
+				coreBackButton(c, r)
+				coreForwardButton(c, r)
+			})
+		}, 400, 300)
+		tick := ticker(tt, now)
+		// The buttons' labels are among the texts; the tip adds its own.
+		shown := func(label string) bool {
+			n := 0
+			for _, s := range tt.Texts() {
+				if s == label {
+					n++
+				}
+			}
+			return n > 1
+		}
+		for _, label := range []string{"Back", "Forward"} {
+			b, ok := tt.Find(label)
+			if !ok {
+				t.Fatalf("no %s button", label)
+			}
+			tt.Move(390, 290)
+			tick(time.Second)
+			if shown(label) {
+				t.Fatalf("the %s tip shows away from it; texts %q", label, tt.Texts())
+			}
+			tt.Move(b.X+b.W/2, b.Y+b.H/2)
+			tick(time.Second)
+			if !shown(label) {
+				t.Errorf("no tip on the disabled %s button; texts %q", label, tt.Texts())
+			}
+		}
+	})
 }
 
 // TestTooltipAnchored checks that the tip of Tooltip goes by its element,
