@@ -47,7 +47,8 @@ func init() {
 		if ui.Button(c, "Delete").Clicked() {
 			asking, canceled = true, false
 		}
-		switch ui.AlertDialog(c, &asking, "Delete “Notes”?", "You can't undo this.", "Cancel", "Delete") {
+		switch ui.AlertDialogButtons(c, &asking, "Delete “Notes”?", "You can't undo this.",
+			ui.AlertButton{Label: "Cancel"}, ui.AlertButton{Label: "Delete", Destructive: true}) {
 		case 1:
 			deleted = true
 		case 0, ui.AlertDismissed:
