@@ -3,6 +3,8 @@ package ui
 import (
 	"fmt"
 	"testing"
+
+	"github.com/egoist/mygo/internal/platform"
 )
 
 // TestListSelectionGraysWithoutFocus checks that a list shows its chosen
@@ -274,5 +276,61 @@ func TestListKeepAccent(t *testing.T) {
 	}
 	if row1.bg != theme.Accent || !emphasized[1] {
 		t.Fatalf("focused: r1 shows %v, emphasized %v", row1.bg, emphasized[1])
+	}
+}
+
+// TestListAccentWithContextMenu checks that a list keeps its accent while
+// a context menu drawn at the point a row was right-clicked has the focus,
+// and a submenu of it, whose panels attach to a point by the row and to an
+// item of the menu rather than to the row itself.
+func TestListAccentWithContextMenu(t *testing.T) {
+	sel, other := 0, ""
+	s := ListState{Selected: &sel}
+	rows := map[int]*node{}
+	var theme *Theme
+	tt := coreNewTester(func(c *context) {
+		theme = c.theme
+		coreColumn(c).Fill().Children(func() {
+			coreTextInput(c, &other).Label("other")
+			coreList(c, &s, 3, func(i int) {
+				// The list's row holds the element the menu opens from.
+				rows[i] = coreRow(c).Padding(4).Children(func() { coreTextf(c, "row %d", i) }).PopoverMenu(func(m *Menu) {
+					m.Item("Copy")
+					m.Submenu("Share", func(m *Menu) { m.Item("Mail") })
+				}).parent
+			}).Grow(1)
+		})
+	}, 400, 300)
+	tt.send(platform.SurfaceEvent{Kind: platform.AccessibilityOn})
+	if err := tt.Click("row 1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := tt.RightClick("row 1"); err != nil {
+		t.Fatal(err)
+	}
+	if !tt.HasText("Copy") {
+		t.Fatalf("no context menu; texts %q", tt.Texts())
+	}
+	tt.Key(0, KeyDown)
+	wantFocus(t, tt, "Copy")
+	tt.Frame()
+	if r := rows[sel]; sel != 1 || r.bg != theme.Accent {
+		t.Errorf("a context menu opened from a row: row %d shows %v", sel, r.bg)
+	}
+	tt.Key(0, KeyDown)
+	tt.Key(0, KeyRight)
+	wantFocus(t, tt, "Mail")
+	tt.Frame()
+	if r := rows[sel]; r.bg != theme.Accent {
+		t.Errorf("its submenu: row %d shows %v", sel, r.bg)
+	}
+	// Closed, with the focus elsewhere, the list goes gray.
+	tt.Key(0, KeyEscape)
+	tt.Key(0, KeyEscape)
+	if err := tt.Click("other"); err != nil {
+		t.Fatal(err)
+	}
+	if r := rows[sel]; r.bg != theme.SurfacePressed {
+		t.Errorf("the focus elsewhere: row %d shows %v", sel, r.bg)
 	}
 }

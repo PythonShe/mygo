@@ -831,25 +831,7 @@ func (e *node) focusOwned() bool {
 		return true
 	}
 	rt := e.c.rt
-	id := rt.focused
-	// A popover opened from a popover's item, as a submenu, leads back
-	// step by step; the bound stops a cycle.
-	for range 8 {
-		i := slices.Index(rt.focusOrder, id)
-		if i < 0 || i >= len(rt.focusScopes) || rt.focusScopes[i].anchor == 0 {
-			return false
-		}
-		id = rt.focusScopes[i].anchor
-		for s := rt.states[id]; s != nil; s = rt.states[s.parent] {
-			if s.id == e.id {
-				return true
-			}
-			if s.parent == 0 {
-				break
-			}
-		}
-	}
-	return false
+	return rt.focused != 0 && rt.leadsTo(rt.focused, e.id, 0)
 }
 
 // build builds row i in the list.
