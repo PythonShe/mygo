@@ -222,9 +222,57 @@ func TestTableCellsGrayWithoutFocus(t *testing.T) {
 	if cell.bg != theme.SurfacePressed || cell.ts.set&setColor != 0 || cell.checked != 2 {
 		t.Fatalf("table without the focus: the cell shows %v, its text set %v, checked %d", cell.bg, cell.ts.set&setColor != 0, cell.checked)
 	}
+	s.KeepAccent = true
+	tt.Frame()
+	if cell.bg != theme.Accent || cell.ts.color != theme.AccentText {
+		t.Fatalf("KeepAccent without the focus: the cell shows %v under %v", cell.bg, cell.ts.color)
+	}
+	s.KeepAccent = false
 	s.CellsStyle = CellsStyle{Cell: Hex("#ffeeaa"), CellText: Hex("#112233")}
 	tt.Frame()
 	if cell.bg != s.CellsStyle.Cell || cell.ts.color != s.CellsStyle.CellText {
 		t.Errorf("CellsStyle without the focus: the cell shows %v under %v", cell.bg, cell.ts.color)
+	}
+}
+
+// TestListKeepAccent checks that KeepAccent keeps the chosen row in the
+// accent without the focus, for a list whose keys a search field above it
+// takes, and that ListRow.Emphasized tells row content how the row shows.
+func TestListKeepAccent(t *testing.T) {
+	sel, query := 1, ""
+	s := ListState{Selected: &sel}
+	emphasized := map[int]bool{}
+	var row1 *node
+	var theme *Theme
+	tt := NewTester(func(c *Context) {
+		theme = c.Theme()
+		Column(c).Fill().Children(func() {
+			TextInput(c, &query).Label("search")
+			List(c, &s, 3).Grow(1).Rows(func(row ListRow) {
+				n := Textf(row.Context, "r%d", row.Index).node()
+				emphasized[row.Index] = row.Emphasized()
+				if row.Index == 1 {
+					row1 = n.parent
+				}
+			})
+		})
+	}, 300, 300)
+	if err := tt.Click("search"); err != nil {
+		t.Fatal(err)
+	}
+	if row1.bg != theme.SurfacePressed || emphasized[1] {
+		t.Fatalf("without the focus: r1 shows %v, emphasized %v", row1.bg, emphasized[1])
+	}
+	s.KeepAccent = true
+	tt.Frame()
+	if row1.bg != theme.Accent || row1.ts.color != theme.AccentText || !emphasized[1] || emphasized[0] {
+		t.Fatalf("KeepAccent: r1 shows %v under %v, emphasized %v (r0 %v)", row1.bg, row1.ts.color, emphasized[1], emphasized[0])
+	}
+	s.KeepAccent = false
+	if err := tt.Click("r1"); err != nil {
+		t.Fatal(err)
+	}
+	if row1.bg != theme.Accent || !emphasized[1] {
+		t.Fatalf("focused: r1 shows %v, emphasized %v", row1.bg, emphasized[1])
 	}
 }

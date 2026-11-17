@@ -377,7 +377,7 @@ ui.List(c.Key("files"), &app.list, len(app.files)).Grow(1).
         ui.Column(row.Context).Padding(6, 12).Children(func() {
             ui.Text(row.Context, app.files[row.Index].Name)
             dir := ui.Text(row.Context, app.files[row.Index].Dir).TextColor(c.Theme().TextMuted)
-            if row.Selected() && row.ListFocused() {
+            if row.Emphasized() {
                 dir.TextColor(c.Theme().AccentText)
             }
         })
@@ -392,8 +392,10 @@ in the theme's `SurfacePressed`, a gray, with the text's own color, as
 AppKit's tables and the [sidebar](sidebar.md) do. With two lists on
 screen, as a history and the files of the commit chosen in it, the one the
 keys move is the one in the accent. Text given a color of its own follows
-`row.Selected() && row.ListFocused()`, as above, to show on the accent. A
-Table's cells chosen do the same.
+`row.Emphasized()`, as above, to show on the accent. A Table's cells chosen
+do the same. `KeepAccent` keeps the accent without the focus, for a list
+whose keys another control takes, as the results under a launcher's search
+field.
 
 Call `app.list.Handle.Focus()` on the UI thread to request focus, or
 `Focus(c)` to select a window explicitly. `Focused(c)` reports focus on the

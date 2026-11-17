@@ -115,7 +115,7 @@ ui.List(c.Key("files"), &a.list, len(a.files)).Bind(&a.filesView).Grow(1).
     Selection(&a.selection).
     Rows(func(row ui.ListRow) {
         dir := ui.Text(row.Context, a.files[row.Index].Dir).TextColor(c.Theme().TextMuted)
-        if row.Selected() && row.ListFocused() {
+        if row.Emphasized() {
             dir.TextColor(c.Theme().AccentText)
         }
     })

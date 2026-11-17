@@ -13,19 +13,32 @@ type ListRow struct {
 }
 
 // Selected reports whether the row is chosen. A chosen row shows in the
-// accent with the accent's text color while the list has the focus
-// (ListFocused), and in gray with the text's own color otherwise: text
-// of a color of its own shows on the accent only when both hold.
-//
-//	dir := ui.Text(row.Context, file.Dir).TextColor(t.TextMuted)
-//	if row.Selected() && row.ListFocused() {
-//		dir.TextColor(t.AccentText)
-//	}
+// accent while the list has the focus, and in gray otherwise
+// (ListState.KeepAccent): Emphasized tells which.
 func (r ListRow) Selected() bool { return r.owner.Valid() && r.selected }
 
 // ListFocused reports whether the list or one of its descendants has the
-// keyboard focus, which shows its chosen rows in the accent.
+// keyboard focus.
 func (r ListRow) ListFocused() bool { return r.owner.FocusWithin() }
+
+// Emphasized reports whether the row is chosen and shows it in the
+// accent, with the accent's text color: while the list has the focus, or
+// a menu or popover opened from it does, and always with
+// ListState.KeepAccent. A chosen row that is not shows in gray with the
+// text's own color. Text of a color of its own follows it
+// to show on the accent:
+//
+//	dir := ui.Text(row.Context, file.Dir).TextColor(t.TextMuted)
+//	if row.Emphasized() {
+//		dir.TextColor(t.AccentText)
+//	}
+func (r ListRow) Emphasized() bool {
+	if !r.Selected() {
+		return false
+	}
+	f := r.owner.node().rowsOf
+	return f != nil && f.emphasized()
+}
 
 // Hovered reports whether the pointer is over the row, as Element.Hovered
 // does for the row: content asking for it is built again as the pointer

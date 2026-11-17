@@ -78,7 +78,8 @@ it is. Chosen rows are not tinted whole. `SelectedColumns` returns the
 block's column IDs in the order shown, and `SelectColumns` chooses every row
 and a range of columns, for the app's own commands. `CellSelected(row, col)`
 tells a cell builder whether its cell is chosen, and with `FocusWithin(c)`
-whether it shows in the accent, for text of its own color to show on it. A
+whether it shows in the accent, for text of its own color to show on it.
+`KeepAccent` keeps the accent while the table does not have the focus. A
 cell that reads its
 row's click with `RowClicked`, or its double click with `RowDoubleClicked`,
 leaves the click to the row, so the block follows it.

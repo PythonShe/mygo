@@ -80,8 +80,8 @@ type ListState struct {
 	// End do while the list has the keyboard focus, and Page Up and Page
 	// Down on Linux and Windows: *Selected is the chosen row, -1 for none,
 	// which shows in the accent color while the list has the focus (or a
-	// menu or popover opened from it does) and in gray otherwise. The
-	// list's Changed reports a new
+	// menu or popover opened from it does) and in gray otherwise
+	// (KeepAccent). The list's Changed reports a new
 	// choice, and its Submitted a double click or Enter. With a Key, the
 	// choice follows its item as rows come and go, and becomes -1 when the
 	// item is no longer among the rows: the list writes that as it builds,
@@ -108,6 +108,13 @@ type ListState struct {
 	// choosing cells the cell too, unless it is in the block. A list with
 	// Selected alone never chooses on a right-click.
 	MenuKeepsSelection bool
+	// KeepAccent shows the chosen rows in the accent while neither the
+	// list nor anything in it has the keyboard focus too. Without it they
+	// show there in the theme's SurfacePressed, a gray, with the text's own
+	// color, as AppKit's tables do, so that of two lists the one the keys
+	// move stands out. Set it for a list whose keys another control takes,
+	// as the results under a launcher's search field.
+	KeepAccent bool
 	// Label returns the text of row i: typing the first letters of a
 	// row's text while the list has the keyboard focus chooses it, and
 	// assistive technology reads it as the row's name.
@@ -802,12 +809,12 @@ func (s *ListState) plan(e *node, n int) (a, first, last int) {
 }
 
 // emphasized reports whether the list shows its chosen rows in the
-// accent: while the focus is in it or in an overlay opened from it
-// (focusOwned). It asks once a pass.
+// accent: with KeepAccent, or while the focus is in it or in an overlay
+// opened from it (focusOwned). It asks once a pass.
 func (f *listFrame) emphasized() bool {
 	if f.emph == 0 {
 		f.emph = 1
-		if f.owner.focusOwned() {
+		if f.s.KeepAccent || f.owner.focusOwned() {
 			f.emph = 2
 		}
 	}

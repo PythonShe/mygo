@@ -136,7 +136,7 @@ func (s *ListState) inBlock(k int) bool {
 // not choose cells, every cell of a chosen row is. It is false before the
 // list is first built. A cell builder can style what it holds with it,
 // and FocusWithin, as the block shows in the accent only while the table
-// has the focus:
+// has the focus (KeepAccent):
 //
 //	ui.Table(c, &app.grid, cols, len(app.rows), func(row, col int) {
 //		text := ui.Text(c, app.rows[row][col])

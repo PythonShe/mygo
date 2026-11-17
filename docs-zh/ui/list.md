@@ -241,14 +241,14 @@ ui.List(c.Key("files"), &app.list, len(app.files)).Grow(1).
         ui.Column(row.Context).Padding(6, 12).Children(func() {
             ui.Text(row.Context, app.files[row.Index].Name)
             dir := ui.Text(row.Context, app.files[row.Index].Dir).TextColor(c.Theme().TextMuted)
-            if row.Selected() && row.ListFocused() {
+            if row.Emphasized() {
                 dir.TextColor(c.Theme().AccentText)
             }
         })
     })
 ```
 
-只有当列表或其中的内容具有焦点，或者从列表打开的菜单或弹出面板具有焦点时（对话框会接管按键，列表随之变灰），选中的行才以强调色及其文字颜色显示；列表没有焦点时，选中的行使用主题的 `SurfacePressed`（一种灰色）并保留文字本身的颜色，这与 AppKit 的表格和[侧边栏](sidebar.md)一致。屏幕上有两个列表时，例如提交历史和所选提交的文件列表，键盘操作的那个列表会以强调色显示。设置了自定义颜色的文字跟随 `row.Selected() && row.ListFocused()`，如上例所示，以便在强调色上清晰可见。表格中选中的单元格也是如此。
+只有当列表或其中的内容具有焦点，或者从列表打开的菜单或弹出面板具有焦点时（对话框会接管按键，列表随之变灰），选中的行才以强调色及其文字颜色显示；列表没有焦点时，选中的行使用主题的 `SurfacePressed`（一种灰色）并保留文字本身的颜色，这与 AppKit 的表格和[侧边栏](sidebar.md)一致。屏幕上有两个列表时，例如提交历史和所选提交的文件列表，键盘操作的那个列表会以强调色显示。设置了自定义颜色的文字跟随 `row.Emphasized()`，如上例所示，以便在强调色上清晰可见。表格中选中的单元格也是如此。`KeepAccent` 让列表没有焦点时也保持强调色，适用于由其他控件接收按键的列表，例如启动器搜索框下方的结果列表。
 
 在 UI 线程上调用 `app.list.Handle.Focus()` 请求焦点，或用 `Focus(c)` 显式选择一个窗口。`Focused(c)` 报告焦点在列表上，`FocusWithin(c)` 则把它的后代也算在内。只有该句柄对应的控件存在且启用时，句柄的快捷键动作才会在构建之后运行。
 
